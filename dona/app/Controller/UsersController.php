@@ -101,4 +101,19 @@ class UsersController extends AppController {
 		}
 		return $this->redirect(array('action' => 'index'));
 	}
+
+
+	public function login($id = null) {
+	if ($this->request->is('post')) {
+            if ($this->Auth->login()) {
+                $userId = $this->Auth->user('id');
+                $this->User->updateLastLogin($userId);
+                $this->User->updateLoginActive($userId);
+                $user = $this->Auth->user();
+}else {
+                $this->Session->setFlash('ユーザー名またはパスワードをご確認ください');
+            }
+
+		}
+	}
 }
