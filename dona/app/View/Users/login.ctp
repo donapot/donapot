@@ -16,9 +16,10 @@
                     <h2 class="title">ログイン</h2>
                         <div class="users_form">
                             <?php
-                                echo $this->Session->flash();
-                                echo $this->Form->create('User'); ?>
-                                <?php echo $this->Form->input('username', array('label' => 'ユーザー名', 'class' => 'form-control', 'placeholder'=>'User Name')); ?>
+                                echo $this->Session->flash('auth');
+                                // echo $this->Flash->render('auth');
+                                echo $this->Form->create('User',array('action' => 'login')); ?>
+                                <?php echo $this->Form->input('user_name', array('label' => 'ユーザー名', 'class' => 'form-control', 'placeholder'=>'User Name')); ?>
                                 <?php echo $this->Form->input('password', array('label' => 'パスワード', 'class' => 'form-control', 'placeholder'=>'password')); ?>
                   <table>
                     <tbody class="loginTable">

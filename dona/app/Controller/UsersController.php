@@ -7,14 +7,26 @@ App::uses('AppController', 'Controller');
  * @property PaginatorComponent $Paginator
  */
 class UsersController extends AppController {
-
 /**
  * Components
  *
  * @var array
  */
-	public $components = array('Paginator');
-
+	public function beforeFilter() {
+		parent::beforeFilter();
+		// ユーザー自身による登録とログアウトを許可する
+		$this->Auth->allow('add', 'logout');
+	}
+	
+	public function login() {
+		if ($this->request->is('post')) {
+			if ($this->Auth->login()) {
+				$this->redirect($this->Auth->redirect());
+			} else {
+				$this->Session->setFlash(__('Invalid username or password, try again'));
+			}
+		}
+	}
 /**
  * index method
  *
@@ -22,7 +34,7 @@ class UsersController extends AppController {
  */
 	public function index() {
 		$this->User->recursive = 0;
-		$this->set('users', $this->Paginator->paginate());
+ 		$this->set('users', $this->Paginator->paginate());
 	}
 
 /**
@@ -100,20 +112,5 @@ class UsersController extends AppController {
 			$this->Session->setFlash(__('The user could not be deleted. Please, try again.'));
 		}
 		return $this->redirect(array('action' => 'index'));
-	}
-
-
-	public function login($id = null) {
-	if ($this->request->is('post')) {
-            if ($this->Auth->login()) {
-                $userId = $this->Auth->user('id');
-                $this->User->updateLastLogin($userId);
-                $this->User->updateLoginActive($userId);
-                $user = $this->Auth->user();
-}else {
-                $this->Session->setFlash('ユーザー名またはパスワードをご確認ください');
-            }
-
-		}
 	}
 }
