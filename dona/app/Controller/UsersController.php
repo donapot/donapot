@@ -1,116 +1,88 @@
 <?php
-App::uses('AppController', 'Controller');
-/**
- * Users Controller
- *
- * @property User $User
- * @property PaginatorComponent $Paginator
- */
 class UsersController extends AppController {
-/**
- * Components
- *
- * @var array
- */
-	public function beforeFilter() {
-		parent::beforeFilter();
-		// ユーザー自身による登録とログアウトを許可する
-		$this->Auth->allow('add', 'logout');
-	}
-	
-	public function login() {
-		if ($this->request->is('post')) {
-			if ($this->Auth->login()) {
-				$this->redirect($this->Auth->redirect());
-			} else {
-				$this->Session->setFlash(__('Invalid username or password, try again'));
-			}
-		}
-	}
-/**
- * index method
- *
- * @return void
- */
-	public function index() {
-		$this->User->recursive = 0;
- 		$this->set('users', $this->Paginator->paginate());
-	}
 
-/**
- * view method
- *
- * @throws NotFoundException
- * @param string $id
- * @return void
- */
-	public function view($id = null) {
-		if (!$this->User->exists($id)) {
-			throw new NotFoundException(__('Invalid user'));
-		}
-		$options = array('conditions' => array('User.' . $this->User->primaryKey => $id));
-		$this->set('user', $this->User->find('first', $options));
-	}
+      public $helpers = array('Html', 'Form');
+      public $uses = array( 'User');
+      
+    public function beforeFilter() {
+        parent::beforeFilter();
+        // login,add,logoutを許可
+        $this->Auth->allow('login', 'add', 'logout');
+    }
 
-/**
- * add method
- *
- * @return void
- */
-	public function add() {
-		if ($this->request->is('post')) {
-			$this->User->create();
-			if ($this->User->save($this->request->data)) {
-				$this->Session->setFlash(__('The user has been saved.'));
-				return $this->redirect(array('action' => 'index'));
-			} else {
-				$this->Session->setFlash(__('The user could not be saved. Please, try again.'));
-			}
-		}
-	}
+    // ログイン
+    public function login() {
+      
+            if ($this->request->is('post')) {
+                debug($this->request->data['User']['password']) ;
+                  if ($this->Auth->login()) {
+                        $this->redirect($this->Auth->redirect());
+                  } else {
+                        debug($this->request->data);
+                        $this->Session->setFlash(__('Invalid username or password, try again'), 'default', array(), 'auth');
+                  }
+            }
+    }
 
-/**
- * edit method
- *
- * @throws NotFoundException
- * @param string $id
- * @return void
- */
-	public function edit($id = null) {
-		if (!$this->User->exists($id)) {
-			throw new NotFoundException(__('Invalid user'));
-		}
-		if ($this->request->is(array('post', 'put'))) {
-			if ($this->User->save($this->request->data)) {
-				$this->Session->setFlash(__('The user has been saved.'));
-				return $this->redirect(array('action' => 'index'));
-			} else {
-				$this->Session->setFlash(__('The user could not be saved. Please, try again.'));
-			}
-		} else {
-			$options = array('conditions' => array('User.' . $this->User->primaryKey => $id));
-			$this->request->data = $this->User->find('first', $options);
-		}
-	}
+    // ログアウト
+    public function logout() {
+        $this->redirect($this->Auth->logout());
+    }
 
-/**
- * delete method
- *
- * @throws NotFoundException
- * @param string $id
- * @return void
- */
-	public function delete($id = null) {
-		$this->User->id = $id;
-		if (!$this->User->exists()) {
-			throw new NotFoundException(__('Invalid user'));
-		}
-		$this->request->allowMethod('post', 'delete');
-		if ($this->User->delete()) {
-			$this->Session->setFlash(__('The user has been deleted.'));
-		} else {
-			$this->Session->setFlash(__('The user could not be deleted. Please, try again.'));
-		}
-		return $this->redirect(array('action' => 'index'));
-	}
+    // ログイン後の遷移
+    public function index() {
+        $this->User->recursive = 0;
+        $this->set('users', $this->paginate());
+        
+        $user = $this->Auth->user();
+    }
+
+    // 新規登録
+    public function add() {
+      
+        if ($this->request->is('post')) {
+            $this->User->create();
+            if ($this->User->save($this->request->data)) {
+                $this->redirect(array('action' => 'index'));
+            } else {
+                $this->Session->setFlash(__('ユーザーが登録できません。'));
+            }
+        }
+    }
+    
+
+
+    // 個人情報の設定
+    public function edit($id = null) {
+        $this->User->id = $id;
+        if (!$this->User->exists()) {
+            throw new NotFoundException(__('無効なユーザーです。'));
+        }
+        if ($this->request->is('post') || $this->request->is('put')) {
+            if ($this->User->save($this->request->data)) {
+                $this->Session->setFlash(__('編集しました。'));
+                $this->redirect(array('action' => 'index'));
+            } else {
+                $this->Session->setFlash(__('編集できませんでした。'));
+            }
+        } else {
+            $this->request->data = $this->User->findById($id);
+            unset($this->request->data['User']['password']);
+        }
+    }
+
+    // 退会する
+    public function delete($id = null) {
+      
+      // 退会後に退会user_idがついているコンテンツ(product,cart,favorite)のステイタスを無効にする(購入履歴以外)
+      // Userのステイタスを無効にする
+      // Userステイタスが無効になったと同時にProduct,Favorite,Cartも無効にする
+      // 退会したユーザのメールアドレスに退会した後にメール送信する
+      // ポップアップで退会理由を記述してもらう
+    }
+    
+    // (パスワード変更)
+    // パスワードリセット
+    // メール認証URL付きメール送信
+    // SNSログイン・登録
 }
