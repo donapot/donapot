@@ -73,6 +73,7 @@
              <li>
               <a href="#contact">お問い合わせ</a>
             </li>
+            <li><?php echo $this->Html->link('ログアウト', array('controller'=>'users', 'action'=>'logout'), array(),'ログアウトしますか?'); ?></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
