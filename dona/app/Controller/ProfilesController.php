@@ -7,7 +7,7 @@ App::uses('AppController', 'Controller');
  * @property PaginatorComponent $Paginator
  */
 class ProfilesController extends AppController {
-
+  public $uses = array('User','Profile');
 /**
  * Components
  *
@@ -22,7 +22,13 @@ class ProfilesController extends AppController {
  */
 	public function index() {
 		$this->Profile->recursive = 0;
-		$this->set('profiles', $this->Paginator->paginate());
+		// $this->set('profiles', $this->Paginator->paginate());
+		$id = $this->Auth->user('id');
+        $profiles = $this->User->find('first',
+        							array(
+        							'conditions'=>array(
+        								'User.id' => $id)));
+        $this->set('profiles',$profiles);
 	}
 
 /**

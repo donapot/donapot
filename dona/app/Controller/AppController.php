@@ -53,6 +53,17 @@ class AppController extends Controller {
 	);
 	
 	public function beforeFilter() {
+
 		$this->Auth->allow('login', 'add');
+
+		// Authでユーザ情報の取得
+		$this->set('auth',$this->Auth->user() );
+
+		// AuthでログインユーザのIDを取得
+		$this->set('user_id', $user_id = $this->Auth->user('id'));
+		
+		//ユーザIDを格納
+		$data = array('ses_user_id' => $user_id);
 	}
+
 }

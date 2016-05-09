@@ -1,18 +1,20 @@
 <?php
 class UsersController extends AppController {
 
-      public $helpers = array('Html', 'Form');
-      public $uses = array( 'User');
+
+    public $helpers = array('Html','Form','UploadPack.Upload');
+    public $uses = array( 'User');
       
     public function beforeFilter() {
         parent::beforeFilter();
         // login,add,logoutを許可
         $this->Auth->allow('login', 'add', 'logout');
     }
+     
 
     // ログイン
     public function login() {
-      
+            $this->layout = "";
             if ($this->request->is('post')) {
                 debug($this->request->data['User']['password']) ;
                   if ($this->Auth->login()) {
@@ -31,15 +33,23 @@ class UsersController extends AppController {
 
     // ログイン後の遷移
     public function index() {
+        $this->layout = "";
         $this->User->recursive = 0;
         $this->set('users', $this->paginate());
         
         $user = $this->Auth->user();
-    }
+        $id = $this->Auth->user('id');
+        $users_d = $this->User->find('first',
+                                    array(
+                                    'conditions'=>array(
+                                        'User.id' => $id)));
+        $this->set('users_d',$users_d);
+
+     }
 
     // 新規登録
     public function add() {
-      
+      $this->layout = "";
         if ($this->request->is('post')) {
             $this->User->create();
             if ($this->User->save($this->request->data)) {
@@ -54,6 +64,7 @@ class UsersController extends AppController {
 
     // 個人情報の設定
     public function edit($id = null) {
+        $this->layout = "";
         $this->User->id = $id;
         if (!$this->User->exists()) {
             throw new NotFoundException(__('無効なユーザーです。'));
@@ -69,6 +80,13 @@ class UsersController extends AppController {
             $this->request->data = $this->User->findById($id);
             unset($this->request->data['User']['password']);
         }
+         $user = $this->Auth->user();
+        $id = $this->Auth->user('id');
+        $users_d = $this->User->find('first',
+                                    array(
+                                    'conditions'=>array(
+                                        'User.id' => $id)));
+        $this->set('users_d',$users_d);
     }
 
     // 退会する
